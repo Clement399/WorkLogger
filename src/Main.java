@@ -14,6 +14,7 @@ public class Main {
 
     // "Database"
     static ArrayList<Work> WorkList=new ArrayList<>();
+    static ArrayList<Work> CompletedList=new ArrayList<>();
 
     // Now, we need methods to add and remove from list
     public void recordWork(Work work){
@@ -104,12 +105,23 @@ public class Main {
 
     public static void printWorkList(){
         for (int i = 0; i < WorkList.size(); i++) {
-            System.out.println("*  "+ i + 1 +"."+ WorkList.get(i) +"  *");
+            System.out.println("*  "+ (i + 1) +"."+ WorkList.get(i) +"  *");
         }
     }
     public static void printWorkListShort(){
         for (int i = 0; i < WorkList.size(); i++) {
-            System.out.println("*  "+ i + 1 +"."+ WorkList.get(i).name +" | "+ WorkList.get(i).dueDate +" | "+ WorkList.get(i).duration +"  *");
+            System.out.println("* |  "+ i + 1 +". | Name : "+ WorkList.get(i).name +" | "+ WorkList.get(i).dueDate +" | "+ WorkList.get(i).duration +"h | *");
+        }
+    }
+
+    public static void printCompletedList(){
+        for (int i = 0; i < CompletedList.size(); i++) {
+            System.out.println("*  "+ i + 1 +"."+ CompletedList.get(i) +"  *");
+        }
+    }
+    public static void printCompletedListShort(){
+        for (int i = 0; i < CompletedList.size(); i++) {
+            System.out.println("* |  "+ i + 1 +". | Name : "+ CompletedList.get(i).name +" | "+ CompletedList.get(i).dueDate +" | "+ CompletedList.get(i).duration +"h | *");
         }
     }
 
@@ -132,18 +144,48 @@ public class Main {
                     // Show all work
                     System.out.println("Showing list of overdue work ...");
                     printWorkList();
+                    sc.nextLine();
                     break;
                 case 2:
                     System.out.println("Please follow the incoming framework to insert work ...");
                     addWork(sc);
+                    sc.nextLine();
                     break;
                 case 3:
-                    System.out.println("Congratulations ! \n What is the work name/ code?");
+                    System.out.println("Congratulations ! \n Please select code");
+                    printWorkListShort();
+                    int selectedChoice = (sc.nextInt());
+                    System.out.println("Completed work : work " + selectedChoice);
+
+
+                    // Add work to completed list
+                    CompletedList.add(WorkList.get(selectedChoice-1));
+                    // Remove work from list
+                    WorkList.remove(selectedChoice-1);
+                    System.out.println("Congratulations ! Work " + selectedChoice + " added to completed list !");
+                    sc.nextLine();
 
                     break;
                 case 4:
-                    System.out.println("Fetching all completed work ...");
-                    System.out.println("All completed work :");
+                    sc.nextLine();
+                    String view = "";
+                    System.out.println("Congratulations ! \n Please select simple (1) or detailed view (2)");
+                    try {
+                        view = sc.nextLine();
+
+                        System.out.println("Fetching all completed work ...");
+                        System.out.println("All completed work :");
+                        if (view.equals("1")) {
+                            printCompletedList();
+                        } else if (view.equals("2")) {
+                            printCompletedListShort();
+                        }
+                    }
+                    catch(InputMismatchException e){
+                        System.out.println(e.getMessage());
+                        System.out.println("Please input again");
+                    }
+                    sc.nextLine();
                     break;
             }
         }
