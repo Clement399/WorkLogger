@@ -71,7 +71,6 @@ public class Main {
         }
         return wWeek;
     }
-
     public static void addWork(Scanner sc){
         try {
             System.out.println("|----------------------------------------------|");
@@ -102,6 +101,18 @@ public class Main {
     }
     }
 
+
+    public static void printWorkList(){
+        for (int i = 0; i < WorkList.size(); i++) {
+            System.out.println("*  "+ i + 1 +"."+ WorkList.get(i) +"  *");
+        }
+    }
+    public static void printWorkListShort(){
+        for (int i = 0; i < WorkList.size(); i++) {
+            System.out.println("*  "+ i + 1 +"."+ WorkList.get(i).name +" | "+ WorkList.get(i).dueDate +" | "+ WorkList.get(i).duration +"  *");
+        }
+    }
+
     public static void main(String[] args) throws InterruptedException {
         Scanner sc = new Scanner(System.in);
         // We want to build a menu
@@ -120,6 +131,7 @@ public class Main {
                 case 1:
                     // Show all work
                     System.out.println("Showing list of overdue work ...");
+                    printWorkList();
                     break;
                 case 2:
                     System.out.println("Please follow the incoming framework to insert work ...");
@@ -127,6 +139,7 @@ public class Main {
                     break;
                 case 3:
                     System.out.println("Congratulations ! \n What is the work name/ code?");
+
                     break;
                 case 4:
                     System.out.println("Fetching all completed work ...");
@@ -178,7 +191,7 @@ public class Main {
         @Override
         public String toString() {
             /* Now, we have a valid to string */
-            return("| "+ name +" | "+ category+ " | "+ week+ " | "+ assignedDate+ " | "+ dueDate+ " | "+ duration+ " | "+ complexity+ " | "+ completionDate+" |");
+            return("| "+ name +" | "+ category+ " | "+ week+ " | Assigned : "+ assignedDate+ " | DUE : "+ dueDate+ " | "+ duration+ " | "+ complexity+ " | "+ completionDate+" |");
         }
     }
 
