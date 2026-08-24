@@ -16,7 +16,7 @@ public class Main {
     static ArrayList<Work> WorkList=new ArrayList<>();
 
     // Now, we need methods to add and remove from list
-    public void addWork(Work work){
+    public void recordWork(Work work){
         WorkList.add(work);
     }
 
@@ -42,6 +42,7 @@ public class Main {
             System.out.println("*     No Work Overdue this week :              *");
         }
         System.out.println("*  ------------------------------------------- *");
+        System.out.println("*******      Press any key to continue   *******");
     }
 
     // Now, we want to build a menu
@@ -70,6 +71,37 @@ public class Main {
         }
         return wWeek;
     }
+
+    public static void addWork(Scanner sc){
+        try {
+            System.out.println("|----------------------------------------------|");
+            sc.nextLine();
+            System.out.println("|           Please input work category         |");
+            String wCategory = sc.nextLine();
+            System.out.println("|             Please input work name           |");
+            String wName = sc.nextLine();
+            int wWeek = inputWeek(sc);
+            System.out.println("|              Please input work time           |");
+            String dateFormat = "dd/MM/yyyy";
+            Date wAssigned = new Date();
+            System.out.println("|           Please input task due date          |");
+            Date wDue = new Date();
+            System.out.println("|  Please input task duration ( estimated )     |");
+            Double wDuration = Double.parseDouble(sc.nextLine());
+            System.out.println("|        Please input task achievability        |");
+            System.out.println("|             ( SSS/SS/A/B/C/D )                |");
+            String wComplexity = sc.nextLine();
+            Work temp = new Work(wCategory, wName, wWeek, wAssigned, wDue, wDuration, wComplexity);
+            System.out.println("|----------------------------------------------|");
+            System.out.println("|                Work Recorded !               |");
+            System.out.println("Work created :  "+ temp);
+            WorkList.add(temp);
+    }
+    catch (Exception e) {
+        System.out.println(e.getMessage());
+    }
+    }
+
     public static void main(String[] args) throws InterruptedException {
         Scanner sc = new Scanner(System.in);
         // We want to build a menu
@@ -83,36 +115,34 @@ public class Main {
         do {
             printMenu();
             choice = sc.nextInt();
+            Thread.sleep(1000);
+            switch (choice) {
+                case 1:
+                    // Show all work
+                    System.out.println("Showing list of overdue work ...");
+                    break;
+                case 2:
+                    System.out.println("Please follow the incoming framework to insert work ...");
+                    addWork(sc);
+                    break;
+                case 3:
+                    System.out.println("Congratulations ! \n What is the work name/ code?");
+                    break;
+                case 4:
+                    System.out.println("Fetching all completed work ...");
+                    System.out.println("All completed work :");
+                    break;
+            }
         }
         while (choice != 5);
 
         sc.nextLine();
-
+        System.out.println("Thank you ! be productive as always");
+        System.out.println("***********************************************");
 
         // Operations
-        try {
-            System.out.println("Please input work category : ");
-            String wCategory = sc.nextLine();
-            System.out.println("Please input work name : ");
-            String wName = sc.nextLine();
-            int wWeek = inputWeek(sc);
-            System.out.println("Please input work time : ");
-            String dateFormat = "dd/MM/yyyy";
-            Date wAssigned = new Date();
-
-            System.out.println("Please input task due date : ");
-            Date wDue = new Date();
-            System.out.println("Please input task duration ( estimated )  : ");
-            Double wDuration = Double.parseDouble(sc.nextLine());
-
-            System.out.println("Please input task achievability ( SSS/SS/A/B/C/D ) : ");
-            String wComplexity = sc.nextLine();
-            Work temp = new Work(wCategory, wName, wWeek, wAssigned, wDue, wDuration, wComplexity);
-            System.out.println("Work created :  "+ temp);
-        }
-        catch (Exception e) {
-            System.out.println(e.getMessage());
-        }
+        // 1. Show all work
+        // 2. Add work -- addWork(sc);
     }
 
     // Operation methods
