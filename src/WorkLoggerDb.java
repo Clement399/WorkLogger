@@ -8,8 +8,6 @@ public class WorkLoggerDb {
 
     public void initialize(){
             // url = uniform resource locator
-            var url = ("jdbc:sqlite:data/worklogger3.db");
-
 
             // Basic operations : 1. Get connection
             // 2. Create statement from connection conn.createStatement("SQL QUERY")
@@ -34,11 +32,34 @@ public class WorkLoggerDb {
                 System.out.println(e);
                 System.out.println(e.getMessage());
             }
+            createCompletedTable();
+            System.out.println("Both tables located.");
     }
-    public long insert(Main.Work w) {
+
+    public void createCompletedTable(){
+        try (Connection conn = DriverManager.getConnection(url);
+             Statement stmt = conn.createStatement();) {
+            stmt.executeUpdate("CREATE TABLE IF NOT EXISTS completed(id INTEGER Primary Key AUTOINCREMENT," +
+                    "category VARCHAR(50) NOT NULL," +
+                    "name VARCHAR(200) NOT NULL," +
+                    "week Int NOT NULL," +
+                    "assignedDate Char(10) NOT NULL," +
+                    "dueDate Char(10) NOT NULL," +
+                    "duration Float NOT NULL," +
+                    "complexity Varchar(5) NOT NULL," +
+                    "completionDate Date ," +
+                    "completed Bool NOT NULL DEFAULT 0 ) ");
+            System.out.println("Connection to SQLite has been established.");
+        }
+        catch(SQLException e){
+            System.out.println(e);
+            System.out.println(e.getMessage());
+        }
+    }
+    public long insert(Main.Work w, String dbName) {
         var url = ("jdbc:sqlite:data/worklogger3.db");
 
-        var insertQuery = ("INSERT INTO work(category, name, week, assignedDate, dueDate, duration, complexity) VALUES(?,?,?,?,?,?,?);)");
+        var insertQuery = ("INSERT INTO "+ dbName +"(category, name, week, assignedDate, dueDate, duration, complexity, completionDate, completed) VALUES(?,?,?,?,?,?,?,?,?);)");
         try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement stmt = conn.prepareStatement(insertQuery);) {
                 stmt.setString(1,w.category);
@@ -48,6 +69,12 @@ public class WorkLoggerDb {
                 stmt.setString(5, (w.dueDate).toString());
                 stmt.setFloat(6,w.duration);
                 stmt.setString(7, (w.complexity));
+                System.out.println("#####Completion date in insert time : "+ w.completionDate);
+                if(w.completionDate != null){
+                    System.out.println("#####Completion date not null : "+ w.completionDate);
+                    stmt.setString(8, (w.completionDate).toString());
+                }
+                stmt.setBoolean(9,w.completed);
                 stmt.executeUpdate();
                 try (
                         Statement idStatement = conn.createStatement();
@@ -69,6 +96,7 @@ public class WorkLoggerDb {
                 }
                 System.out.println("Inserted records successfully.");
                 System.out.println("Id of work: " + w.id);
+                System.out.println("Inserted work in : " + dbName +", "+ w);
         }
         catch(SQLException e){
             System.out.println(e);
@@ -77,7 +105,7 @@ public class WorkLoggerDb {
         return w.id;
     }
     //Select
-    public void selectOne(long id, String dbName){
+    public Main.Work selectOne(long id, String dbName){
         String selectQuery = "SELECT * FROM "+ dbName +" WHERE id = " + id;
         try(Connection conn = DriverManager.getConnection(url);
         Statement stmt = conn.createStatement();
@@ -94,11 +122,31 @@ public class WorkLoggerDb {
                         rs.getString("complexity"),
                         rs.getString("completionDate"),
                         rs.getInt("completed"));
+                long sId = rs.getLong("id");
+                String sCategory = rs.getString("category");
+                String sName = rs.getString("name");
+                int sWeek = rs.getInt("week");
+                LocalDate sAssignedDate = LocalDate.parse(rs.getString("assignedDate"));
+                LocalDate sDueDate = LocalDate.parse(rs.getString("dueDate"));
+                long sDuration = rs.getLong("duration");
+                String sComplexity = rs.getString("complexity");
+                LocalDate sCompletionDate = null;
+                if((rs.getString("completionDate") != null)){
+                    sCompletionDate = LocalDate.parse(rs.getString("completionDate"));
+                }
+                boolean sCompleted = rs.getBoolean("completed");
+                Main.Work selectedWork = new Main.Work(sCategory,sName,sWeek,sAssignedDate,sDueDate,sDuration,sComplexity);
+                selectedWork.id = sId;
+                selectedWork.completionDate = sCompletionDate;
+                selectedWork.completed = sCompleted;
+                return selectedWork;
             }
         }catch( SQLException e){
             System.err.println(e.getMessage());
             e.printStackTrace();
+            return null;
         }
+        return null;
     }
     public void selectAll(String dbName){
         String selectQuery = "SELECT * FROM "+ dbName;
@@ -195,9 +243,9 @@ public class WorkLoggerDb {
         }
         WorkLoggerDb wdb = new WorkLoggerDb();
         wdb.initialize();
-        Main.Work w = new Main.Work("cat","workname",3, LocalDate.now(), LocalDate.of(2026,10,2),5,"S");
+        Main.Work w = new Main.Work("newlongcat","workname",3, LocalDate.now(), LocalDate.of(2026,10,2),5,"S");
         System.out.println(w);
-        wdb.insert(w);
+        wdb.insert(w, "work");
         wdb.selectOne(2,"work");
         System.out.println("All records");
         wdb.selectAll("work");
@@ -210,6 +258,33 @@ public class WorkLoggerDb {
         wdb.updateCompleted(7);
         wdb.delete(37);
         wdb.selectAll("work");
+        wdb.completedWork(69);
+        System.out.println("All records in completed array");
+        wdb.selectAll("completed");
+    }
+
+    // Completed :
+    // When completed,
+    /*
+    * 1. work(i).completeTime = time.now
+    * 2. completed.add work(i)
+    * 3. work.delete(i)
+    * 4. (optional) : print completed ((completed.last-5) ... completed.last)
+    *
+    * */
+    public void completedWork(long id){
+        if(selectOne(id,"work") != null){
+            System.out.println("Completing work in completedWork: " + id);
+            updateCompleted(id);
+            System.out.println("Work that is completed in workdb : " + id);
+            Main.Work selected = selectOne(id,"work");
+            System.out.println("Completion date of selected work order : "+ selected + "Done : "+ selected.completed);
+            insert(selected,"completed");
+            delete(id);
+        }
+        else{
+            System.out.println("No work #"+ id +" in completedWork");
+        }
     }
 
 }
