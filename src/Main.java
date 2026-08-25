@@ -183,18 +183,22 @@ public class Main {
     private static void completedListMenu(WorkLoggerDb wdb, Scanner sc){
         System.out.println("Congratulations ! \n Please select simple (1) or detailed view (2)");
         String view = "";
-        view = sc.nextLine();
-        if (view.equals("1")) {
-            System.out.println("Fetching all completed work ...");
-            System.out.println("All completed work :");
-            printCompletedList(wdb);
-        } else if (view.equals("2")) {
-            System.out.println("Fetching all completed work ...");
-            System.out.println("All completed work :");
-            printCompletedListShort();
-        }
-        else{
-            completedListMenu(wdb,sc);
+        while(true){
+            view = sc.nextLine();
+            switch (view){
+                case "1":
+                    System.out.println("Fetching all completed work ...");
+                    System.out.println("All completed work :");
+                    printCompletedList(wdb);
+                    return;
+                case "2":
+                    System.out.println("Fetching all completed work ...");
+                    System.out.println("All completed work :");
+                    printCompletedListShort();
+                    return;
+                default:
+                    System.out.println("Invalid choice , please choose 1 or 2");
+            }
         }
     }
     private static void exit(){
