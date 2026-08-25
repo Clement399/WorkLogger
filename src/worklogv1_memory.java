@@ -1,39 +1,34 @@
 import java.time.Duration;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-// Work log 24/8 3pm -- error/boundary check; add database for storage
-//TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
-// click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
-public class Main {
-    // A simple script to keep track of overdue tasks/ work and keep track of tasks
-    // Helps to manage life when things get messy
 
-    // "Database"
+public class worklogv1_memory {
     /* Task # 1 -- add real sqlite database */
     static ArrayList<Work> WorkList=new ArrayList<>();
     static ArrayList<Work> CompletedList=new ArrayList<>();
 
     // Now, we need methods to add and remove from list
-    public void recordWork(Work work, WorkLoggerDb wdb){
-        wdb.insert(work,"work");
+    public void recordWork(Work work){
+        WorkList.add(work);
+    }
+    public void recordWorkConnected(WorkLoggerDb wdb, Work w){
+        wdb.insert(w,"work");
     }
 
-    public void removeWork(Work work, WorkLoggerDb wdb){
-        wdb.delete(work.id);
+    public void removeWork(Work work){
+        WorkList.remove(work);
     }
 
     public LocalTime getTime(){
         return LocalTime.now();
     }
 
-    public static void printLogin(WorkLoggerDb wdb){
+    public static void printLogin(){
         System.out.println("************************************************");
         System.out.println("*     Welcome To Clement's Work Calculator     *");
         System.out.println("*     Today's Date : "+ LocalDate.now() +"                *");
@@ -48,12 +43,10 @@ public class Main {
         System.out.println("*   You have "+ hourDiff +" hours ("+ minuteDiff +"m) left in this day  ! *");
         System.out.println("*  ------------------------------------------- *");
         System.out.println("*       Work overdue this week :               *");
-        if(wdb.getTableSize("work") > 0){
-//            for (int i = 0; i < WorkList.size(); i++) {
-//                // a place where a cache could work
-//                System.out.println("*  "+ i +"."+ WorkList.get(i) +"  *");
-//            }
-            wdb.selectAll("work");
+        if(!WorkList.isEmpty()){
+            for (int i = 0; i < WorkList.size(); i++) {
+                System.out.println("*  "+ i +"."+ WorkList.get(i) +"  *");
+            }
         }
         else{
             System.out.println("*     Good Job !!                              *");
@@ -81,14 +74,14 @@ public class Main {
         int wWeek = 0;
         try{
             System.out.println("|   Please input work assigned week ( int )    |");
-             wWeek = Integer.parseInt(sc.nextLine());
+            wWeek = Integer.parseInt(sc.nextLine());
         }
         catch(InputMismatchException e2){
             inputWeek(sc2);
         }
         return wWeek;
     }
-    public static void addWork(Scanner sc, WorkLoggerDb wdb){
+    public static void addWork(Scanner sc){
         try {
             System.out.println("|----------------------------------------------|");
             sc.nextLine();
@@ -113,35 +106,37 @@ public class Main {
             System.out.println("|----------------------------------------------|");
             System.out.println("|                Work Recorded !               |");
             System.out.println("Work created :  "+ temp);
-            wdb.insert(temp,"work");
-    }
-    catch (Exception e) {
-        System.out.println(e.getMessage());
-    }
+            WorkList.add(temp);
+        }
+        catch (Exception e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 
-    public static void printWorkList(WorkLoggerDb wdb){
-        wdb.selectAll("work");
+    public static void printWorkList(){
+        for (int i = 0; i < WorkList.size(); i++) {
+            System.out.println("*  "+ (i + 1) +"."+ WorkList.get(i) +"  *");
+        }
     }
     public static void printWorkListShort(){
         for (int i = 0; i < WorkList.size(); i++) {
             System.out.println("* |  "+ (i + 1) +". | Name : "+ WorkList.get(i).name +" | "+ WorkList.get(i).dueDate +" | "+ WorkList.get(i).duration +"h | *");
         }
     }
-    public static void printCompletedList(WorkLoggerDb wdb){
-        wdb.selectAll("completed");
+    public static void printCompletedList(){
+        for (int i = 0; i < CompletedList.size(); i++) {
+            System.out.println("*  "+ (i + 1) +"."+ CompletedList.get(i) +"  *");
+        }
     }
     public static void printCompletedListShort(){
         for (int i = 0; i < CompletedList.size(); i++) {
             System.out.println("* |  "+ (i + 1) +". | Name : "+ CompletedList.get(i).name +" | "+ CompletedList.get(i).dueDate +" | "+ CompletedList.get(i).duration +"h | *");
         }
     }
-    public static void completedWork(long id, WorkLoggerDb wdb){
-        wdb.completedWork(id);
-    }
+
     //Menu operations
-    private static void baseFunctionLoop(Scanner sc, WorkLoggerDb wdb) throws InterruptedException {
+    private static void baseFunctionLoop(Scanner sc) throws InterruptedException {
         int choice = 0;
         do {
             printMenu();
@@ -151,51 +146,58 @@ public class Main {
                 case 1:
                     // Show all work
                     System.out.println("Showing list of overdue work ...");
-                    printWorkList(wdb);
+                    printWorkList();
                     sc.nextLine();
                     break;
                 case 2:
                     System.out.println("Please follow the incoming framework to insert work ...");
-                    addWork(sc, wdb);
+                    addWork(sc);
                     sc.nextLine();
                     break;
                 case 3:
                     System.out.println("Congratulations ! \n Please select code");
                     printWorkListShort();
-                    wdb.selectAll("work");
-                    long selectedChoice = (sc.nextInt());
+                    int selectedChoice = (sc.nextInt()-1);
 
                     // Update completion
-                    completedWork(selectedChoice, wdb);
+                    WorkList.get(selectedChoice).completionDate = LocalDate.now();
+                    WorkList.get(selectedChoice).completed = true;
+                    System.out.println("Completed work : work " + selectedChoice);
+
+
+                    // Add work to completed list
+
+                    CompletedList.add(WorkList.get(selectedChoice));
+                    // Remove work from list
+                    WorkList.remove(selectedChoice);
                     System.out.println("Congratulations ! Work " + selectedChoice + " added to completed list !");
                     sc.nextLine();
 
                     break;
                 case 4:
                     sc.nextLine();
-                    completedListMenu(wdb,sc);
+                    String view = "";
+                    System.out.println("Congratulations ! \n Please select simple (1) or detailed view (2)");
+                    try {
+                        view = sc.nextLine();
+
+                        System.out.println("Fetching all completed work ...");
+                        System.out.println("All completed work :");
+                        if (view.equals("1")) {
+                            printCompletedList();
+                        } else if (view.equals("2")) {
+                            printCompletedListShort();
+                        }
+                    }
+                    catch(InputMismatchException e){
+                        System.out.println(e.getMessage());
+                        System.out.println("Please input again");
+                    }
                     sc.nextLine();
                     break;
             }
         }
         while (choice != 5);
-    }
-    private static void completedListMenu(WorkLoggerDb wdb, Scanner sc){
-        System.out.println("Congratulations ! \n Please select simple (1) or detailed view (2)");
-        String view = "";
-        view = sc.nextLine();
-        if (view.equals("1")) {
-            System.out.println("Fetching all completed work ...");
-            System.out.println("All completed work :");
-            printCompletedList(wdb);
-        } else if (view.equals("2")) {
-            System.out.println("Fetching all completed work ...");
-            System.out.println("All completed work :");
-            printCompletedListShort();
-        }
-        else{
-            completedListMenu(wdb,sc);
-        }
     }
     private static void exit(){
         System.out.println("Thank you ! be productive as always");
@@ -210,13 +212,13 @@ public class Main {
         wdb.initialize();
 
         // We want to build a menu
-        printLogin(wdb);
+        printLogin();
         sc.nextLine();
         // Menu
 
         // After this, we can make it so that it opens menu on keyboard interaction
         // we want the menu to keep printing, except when prompted exit
-        baseFunctionLoop(sc, wdb);
+        baseFunctionLoop(sc);
 
         sc.nextLine();
         exit();
@@ -224,12 +226,4 @@ public class Main {
         // 1. Show all work
         // 2. Add work -- addWork(sc);
     }
-
-    // Operation methods
-    // 1. Add task
-    // demo in app
-
-
-    // Data Classes
-
 }

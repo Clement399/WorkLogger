@@ -2,7 +2,7 @@ import java.sql.*;
 import java.time.LocalDate;
 
 public class WorkLoggerDb {
-    public final String url = "jdbc:sqlite:data/worklogger3.db";
+    public final String url = "jdbc:sqlite:data/worklogger5.db";
 
     public WorkLoggerDb() {
     }
@@ -87,8 +87,6 @@ public class WorkLoggerDb {
     }
 
     public long insert(Work w, String dbName) {
-        var url = ("jdbc:sqlite:data/worklogger3.db");
-
         var insertQuery = ("INSERT INTO " + dbName + "(category, name, week, assignedDate, dueDate, duration, complexity, completionDate, completed) VALUES(?,?,?,?,?,?,?,?,?);)");
         try (Connection conn = DriverManager.getConnection(url);
              PreparedStatement stmt = conn.prepareStatement(insertQuery)) {
@@ -286,4 +284,19 @@ public class WorkLoggerDb {
         }
     }
 
+    // Assisting Functions
+    public int getTableSize(String dbName) {
+        int tableSize = 0;
+        String countQuery = " SELECT Count(*) from "+dbName;
+        try(Connection conn = DriverManager.getConnection(url);
+        Statement stmt = conn.createStatement();
+        ResultSet rs = stmt.executeQuery(countQuery)) {
+            tableSize = rs.getInt(1);
+        }
+        catch (SQLException e) {
+            System.err.println(e.getMessage());
+            e.printStackTrace();
+        }
+        return tableSize;
+    }
 }
