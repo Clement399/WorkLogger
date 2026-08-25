@@ -173,6 +173,18 @@ public class WorkLoggerDb {
         }
     }
     //Delete
+    public void delete(long id){
+        String deleteQuery = """
+                Delete from work WHERE id = ?;
+                """;
+        try(Connection conn = DriverManager.getConnection(url);
+            PreparedStatement stmt = conn.prepareStatement(deleteQuery);){
+            stmt.setLong(1,id);
+            stmt.executeUpdate();
+        }catch (SQLException e){
+            System.err.println(e.getMessage());
+        }
+    }
     // For testing out
     public static void main(String[] args) throws SQLException {
         Connection conn = DriverManager.getConnection("jdbc:sqlite:data/worklogger3");
@@ -196,6 +208,8 @@ public class WorkLoggerDb {
         wdb.update(3,change);
         wdb.selectOne(3,"work");
         wdb.updateCompleted(7);
+        wdb.delete(37);
+        wdb.selectAll("work");
     }
 
 }
