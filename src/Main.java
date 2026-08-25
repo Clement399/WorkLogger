@@ -99,7 +99,8 @@ public class Main {
             // System.out.println("|              Please input task assignment date          |");
             String dateFormat = "dd/MM/yyyy";
             LocalDate wAssigned = LocalDate.now();
-            System.out.println("|    Please input task due date (dd/MM/yyyy)   |");
+            System.out.println("|----------------------------------------------|");
+            System.out.println("|     Please input task due date (dd/MM/yyyy)  |");
             LocalDate wDue = LocalDate.parse(sc.nextLine(), DateTimeFormatter.ofPattern(dateFormat));
             System.out.println("|  Please input task duration ( estimated )     |");
             long wDuration = Long.parseLong(sc.nextLine());
@@ -227,6 +228,7 @@ public class Main {
 
     // Data Classes
     static class Work{
+        long id;
         // Base class for a task
         String category;
         String name;
