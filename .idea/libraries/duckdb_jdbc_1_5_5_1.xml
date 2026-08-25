@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="duckdb_jdbc-1.5.5.1">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/duckdb_jdbc-1.5.5.1.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
