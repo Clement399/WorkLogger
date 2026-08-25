@@ -1,11 +1,14 @@
+import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.InputMismatchException;
 import java.util.Scanner;
-
+// Work log 24/8 3pm -- error/boundary check; add database for storage
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 public class Main {
@@ -13,6 +16,7 @@ public class Main {
     // Helps to manage life when things get messy
 
     // "Database"
+    /* Task # 1 -- add real sqlite database */
     static ArrayList<Work> WorkList=new ArrayList<>();
     static ArrayList<Work> CompletedList=new ArrayList<>();
 
@@ -25,12 +29,23 @@ public class Main {
         WorkList.remove(work);
     }
 
+    public LocalTime getTime(){
+        return LocalTime.now();
+    }
+
     public static void printLogin(){
         System.out.println("************************************************");
         System.out.println("*     Welcome To Clement's Work Calculator     *");
-        System.out.println("*     Today's Date : "+ LocalDate.now() +"     *");
-        System.out.println("*     Time         : "+ LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) +"     *");
-        System.out.println("*     You have xx hours left in this day       *");
+        System.out.println("*     Today's Date : "+ LocalDate.now() +"                *");
+        System.out.println("*     Time Zone : "+ java.time.ZoneId.systemDefault() +"              *");
+        System.out.println("*     Time         : "+ LocalTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) +"                  *");
+
+        // Get hours
+        Duration duration = Duration.between( LocalTime.now(),LocalTime.MAX).truncatedTo(ChronoUnit.MINUTES);
+        long hourDiff = duration.toHours();
+        long minuteDiff = duration.toMinutesPart();
+        System.out.println("*                                              *");
+        System.out.println("*   You have "+ hourDiff +" hours ("+ minuteDiff +"m) left in this day  ! *");
         System.out.println("*  ------------------------------------------- *");
         System.out.println("*       Work overdue this week :               *");
         if(!WorkList.isEmpty()){
@@ -45,7 +60,6 @@ public class Main {
         System.out.println("*  ------------------------------------------- *");
         System.out.println("*******      Press any key to continue   *******");
     }
-
     // Now, we want to build a menu
     public static void printMenu() {
         System.out.println("*  ------------------------------------------- *");
@@ -64,7 +78,7 @@ public class Main {
         Scanner sc2 = sc;
         int wWeek = 0;
         try{
-            System.out.println("Please input work assigned week ( int ): ");
+            System.out.println("|   Please input work assigned week ( int )    |");
              wWeek = Integer.parseInt(sc.nextLine());
         }
         catch(InputMismatchException e2){
@@ -81,13 +95,14 @@ public class Main {
             System.out.println("|             Please input work name           |");
             String wName = sc.nextLine();
             int wWeek = inputWeek(sc);
-            System.out.println("|              Please input work time           |");
+            // Task assignment automated to current time
+            // System.out.println("|              Please input task assignment date          |");
             String dateFormat = "dd/MM/yyyy";
-            Date wAssigned = new Date();
-            System.out.println("|           Please input task due date          |");
-            Date wDue = new Date();
+            LocalDate wAssigned = LocalDate.now();
+            System.out.println("|    Please input task due date (dd/MM/yyyy)   |");
+            LocalDate wDue = LocalDate.parse(sc.nextLine(), DateTimeFormatter.ofPattern(dateFormat));
             System.out.println("|  Please input task duration ( estimated )     |");
-            Double wDuration = Double.parseDouble(sc.nextLine());
+            long wDuration = Long.parseLong(sc.nextLine());
             System.out.println("|        Please input task achievability        |");
             System.out.println("|             ( SSS/SS/A/B/C/D )                |");
             String wComplexity = sc.nextLine();
@@ -110,18 +125,18 @@ public class Main {
     }
     public static void printWorkListShort(){
         for (int i = 0; i < WorkList.size(); i++) {
-            System.out.println("* |  "+ i + 1 +". | Name : "+ WorkList.get(i).name +" | "+ WorkList.get(i).dueDate +" | "+ WorkList.get(i).duration +"h | *");
+            System.out.println("* |  "+ (i + 1) +". | Name : "+ WorkList.get(i).name +" | "+ WorkList.get(i).dueDate +" | "+ WorkList.get(i).duration +"h | *");
         }
     }
 
     public static void printCompletedList(){
         for (int i = 0; i < CompletedList.size(); i++) {
-            System.out.println("*  "+ i + 1 +"."+ CompletedList.get(i) +"  *");
+            System.out.println("*  "+ (i + 1) +"."+ CompletedList.get(i) +"  *");
         }
     }
     public static void printCompletedListShort(){
         for (int i = 0; i < CompletedList.size(); i++) {
-            System.out.println("* |  "+ i + 1 +". | Name : "+ CompletedList.get(i).name +" | "+ CompletedList.get(i).dueDate +" | "+ CompletedList.get(i).duration +"h | *");
+            System.out.println("* |  "+ (i + 1) +". | Name : "+ CompletedList.get(i).name +" | "+ CompletedList.get(i).dueDate +" | "+ CompletedList.get(i).duration +"h | *");
         }
     }
 
@@ -155,10 +170,15 @@ public class Main {
                     System.out.println("Congratulations ! \n Please select code");
                     printWorkListShort();
                     int selectedChoice = (sc.nextInt());
+
+                    // Update completion
+                    WorkList.get(selectedChoice).completionDate = LocalDate.now();
+                    WorkList.get(selectedChoice).completed = true;
                     System.out.println("Completed work : work " + selectedChoice);
 
 
                     // Add work to completed list
+
                     CompletedList.add(WorkList.get(selectedChoice-1));
                     // Remove work from list
                     WorkList.remove(selectedChoice-1);
@@ -211,22 +231,22 @@ public class Main {
         String category;
         String name;
         int week;
-        Date assignedDate;
-        Date dueDate;
-        double duration;
+        LocalDate assignedDate;
+        LocalDate dueDate;
+        long duration;
         String complexity;
-        Date completionDate;
+        LocalDate completionDate;
         boolean completed;
 
-        public Work(String cat, String name, int week, Date assignedDate, Date dueDate, double duration, String complexity) {
+        public Work(String cat, String name, int week, LocalDate assignedDate, LocalDate dueDate, long duration, String complexity) {
             this.category = cat;
             this.name = name;
             this.week = week;
-            this.assignedDate = assignedDate;
-            this.dueDate = dueDate;
+            this.assignedDate = assignedDate; // Should be localDate
+            this.dueDate = dueDate; // Should be localDate
             this.duration = duration;
             this.complexity = complexity;
-            this.completionDate = new Date(); // set default date
+            this.completionDate = null; // set default date
             this.completed = false;
         }
 
