@@ -69,9 +69,7 @@ public class WorkLoggerDb {
                 stmt.setString(5, (w.dueDate).toString());
                 stmt.setFloat(6,w.duration);
                 stmt.setString(7, (w.complexity));
-                System.out.println("#####Completion date in insert time : "+ w.completionDate);
                 if(w.completionDate != null){
-                    System.out.println("#####Completion date not null : "+ w.completionDate);
                     stmt.setString(8, (w.completionDate).toString());
                 }
                 stmt.setBoolean(9,w.completed);
@@ -258,7 +256,7 @@ public class WorkLoggerDb {
         wdb.updateCompleted(7);
         wdb.delete(37);
         wdb.selectAll("work");
-        wdb.completedWork(69);
+        wdb.completedWork(71);
         System.out.println("All records in completed array");
         wdb.selectAll("completed");
     }
@@ -274,11 +272,8 @@ public class WorkLoggerDb {
     * */
     public void completedWork(long id){
         if(selectOne(id,"work") != null){
-            System.out.println("Completing work in completedWork: " + id);
             updateCompleted(id);
-            System.out.println("Work that is completed in workdb : " + id);
             Main.Work selected = selectOne(id,"work");
-            System.out.println("Completion date of selected work order : "+ selected + "Done : "+ selected.completed);
             insert(selected,"completed");
             delete(id);
         }
