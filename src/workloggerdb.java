@@ -4,10 +4,10 @@ public class workloggerdb {
 
     public void initialize(){
         try{
-            Connection conn = DriverManager.getConnection("jdbc:duckdb:data/worklogger.db");
+            Connection conn = DriverManager.getConnection("jdbc:sqlite:data/worklogger3");
             try{
                 Statement stmt = conn.createStatement();
-                ResultSet rs = stmt.executeQuery("CREATE TABLE IF NOT EXISTS Worklogger(id Int Primary Key," +
+                stmt.executeUpdate("CREATE TABLE IF NOT EXISTS Worklogger(id Int Primary Key," +
                         "category VARCHAR(50)," +
                         "name VARCHAR(200)," +
                         "week Int," +
@@ -28,7 +28,7 @@ public class workloggerdb {
     }
 
     public static void main(String[] args) throws SQLException {
-        Connection conn = DriverManager.getConnection("jdbc:duckdb:data/worklogger.db");
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:data/worklogger2");
         try (Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery("SELECT 42")) {
             rs.next();
